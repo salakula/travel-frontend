@@ -1,26 +1,9 @@
 <script setup>
 import { onMounted } from "vue";
 import { ref } from "vue";
-import IngredientServices from "../services/IngredientServices.js";
+import PlaceServices from "../services/PlaceServices.js";
 
-const units = [
-  "cup",
-  "gallon",
-  "gram",
-  "kilogram",
-  "liter",
-  "milliliter",
-  "ounce",
-  "pint",
-  "piece",
-  "pound",
-  "quart",
-  "tablespoon",
-  "teaspoon",
-  "unit",
-];
-
-const ingredients = ref([]);
+const places = ref([]);
 const isAdd = ref(false);
 const isEdit = ref(false);
 const user = ref(null);
@@ -29,22 +12,22 @@ const snackbar = ref({
   color: "",
   text: "",
 });
-const newIngredient = ref({
+const newPlace = ref({
   id: undefined,
   name: undefined,
-  unit: undefined,
-  pricePerUnit: undefined,
+  description: undefined,
+  link: undefined,
 });
 
 onMounted(async () => {
-  await getIngredients();
+  await getPlaces();
   user.value = JSON.parse(localStorage.getItem("user"));
 });
 
-async function getIngredients() {
-  await IngredientServices.getIngredients()
+async function getPlaces() {
+  await PlaceServices.getPlaces()
     .then((response) => {
-      ingredients.value = response.data;
+      places.value = response.data;
     })
     .catch((error) => {
       console.log(error);
@@ -54,14 +37,14 @@ async function getIngredients() {
     });
 }
 
-async function addIngredient() {
+async function addPlace() {
   isAdd.value = false;
-  delete newIngredient.id;
-  await IngredientServices.addIngredient(newIngredient.value)
+  delete newPlace.id;
+  await PlaceServices.addPlace(newPlace.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${newIngredient.value.name} added successfully!`;
+      snackbar.value.text = `${newPlace.value.name} added successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -69,16 +52,16 @@ async function addIngredient() {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getIngredients();
+  await getPlaces();
 }
 
-async function updateIngredient() {
+async function updatePlace() {
   isEdit.value = false;
-  await IngredientServices.updateIngredient(newIngredient.value)
+  await PlaceServices.updatePlace(newPlace.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${newIngredient.name} updated successfully!`;
+      snackbar.value.text = `${newPlace.value.name} updated successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -86,13 +69,13 @@ async function updateIngredient() {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getIngredients();
+  await getPlaces();
 }
 
 function openAdd() {
-  newIngredient.value.name = undefined;
-  newIngredient.value.unit = undefined;
-  newIngredient.value.pricePerUnit = undefined;
+  newPlace.value.name = undefined;
+  newPlace.value.unit = undefined;
+  newPlace.value.pricePerUnit = undefined;
   isAdd.value = true;
 }
 
@@ -101,10 +84,10 @@ function closeAdd() {
 }
 
 function openEdit(item) {
-  newIngredient.value.id = item.id;
-  newIngredient.value.name = item.name;
-  newIngredient.value.unit = item.unit;
-  newIngredient.value.pricePerUnit = item.pricePerUnit;
+  newPlace.value.id = item.id;
+  newPlace.value.name = item.name;
+  newPlace.value.description = item.description;
+  newPlace.value.link = item.link;
   isEdit.value = true;
 }
 
@@ -123,7 +106,7 @@ function closeSnackBar() {
       <v-row align="center" class="mb-4">
         <v-col cols="10"
           ><v-card-title class="pl-0 text-h4 font-weight-bold"
-            >Ingredients
+            >Places
           </v-card-title>
         </v-col>
         <v-col class="d-flex justify-end" cols="2">
@@ -137,16 +120,16 @@ function closeSnackBar() {
         <thead>
           <tr>
             <th class="text-left">Name</th>
-            <th class="text-left">Unit</th>
-            <th class="text-left">Price Per Unit</th>
+            <th class="text-left">Description</th>
+            <th class="text-left">Link</th>
             <th class="text-left">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in ingredients" :key="item.name">
+          <tr v-for="item in places" :key="item.name">
             <td>{{ item.name }}</td>
-            <td>{{ item.unit }}</td>
-            <td>${{ item.pricePerUnit }}</td>
+            <td>{{ item.description }}</td>
+            <td><a :href="item.link">{{ item.link }}</a></td>
             <td>
               <v-icon
                 size="small"
@@ -162,26 +145,24 @@ function closeSnackBar() {
         <v-card class="rounded-lg elevation-5">
           <v-card-item>
             <v-card-title class="headline mb-2"
-              >{{ isAdd ? "Add Ingredient" : isEdit ? "Edit Ingredient" : "" }}
+              >{{ isAdd ? "Add Place" : isEdit ? "Edit Place" : "" }}
             </v-card-title>
           </v-card-item>
           <v-card-text>
             <v-text-field
-              v-model="newIngredient.name"
+              v-model="newPlace.name"
               label="Name"
               required
             ></v-text-field>
-            <v-select
-              v-model="newIngredient.unit"
-              :items="units"
-              label="Unit"
+            <v-text-field
+              v-model="newPlace.description"
+              label="Description"
               required
             >
-            </v-select>
+            </v-text-field>
             <v-text-field
-              v-model="newIngredient.pricePerUnit"
-              label="Price Per Unit"
-              type="number"
+              v-model="newPlace.link"
+              label="Link"
             ></v-text-field>
           </v-card-text>
           <v-card-actions>
@@ -196,10 +177,10 @@ function closeSnackBar() {
               variant="flat"
               color="primary"
               @click="
-                isAdd ? addIngredient() : isEdit ? updateIngredient() : false
+                isAdd ? addPlace() : isEdit ? updatePlace() : false
               "
               >{{
-                isAdd ? "Add Ingredient" : isEdit ? "Update Ingredient" : ""
+                isAdd ? "Add Place" : isEdit ? "Update Place" : ""
               }}</v-btn
             >
           </v-card-actions>

@@ -1,20 +1,20 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import IngredientServices from "../services/IngredientServices.js";
-import RecipeIngredientServices from "../services/RecipeIngredientServices";
-import RecipeStepServices from "../services/RecipeStepServices";
-import RecipeServices from "../services/RecipeServices";
+import PlaceServices from "../services/PlaceServices.js";
+import TripPlaceServices from "../services/TripPlaceServices";
+import DayServices from "../services/DayServices";
+import TripServices from "../services/TripServices";
 
 const route = useRoute();
 
-const recipe = ref({});
-const ingredients = ref([]);
-const selectedIngredient = ref({});
-const recipeIngredients = ref([]);
-const recipeSteps = ref([]);
-const isAddIngredient = ref(false);
-const isEditIngredient = ref(false);
+const trip = ref({});
+const places = ref([]);
+const selectedPlace = ref({});
+const tripPlaces = ref([]);
+const days = ref([]);
+const isAddPlace = ref(false);
+const isEditPlace = ref(false);
 const isAddStep = ref(false);
 const isEditStep = ref(false);
 const snackbar = ref({
@@ -22,44 +22,49 @@ const snackbar = ref({
   color: "",
   text: "",
 });
-const newStep = ref({
+const newDay = ref({
   id: undefined,
-  stepNumber: undefined,
-  instruction: undefined,
-  recipeId: undefined,
-  recipeIngredient: [],
+  day: undefined,
+  weekday: undefined,
+  description: undefined,
+  hotelName: undefined,
+  hotelAddress: undefined,
+  hotelPhone: undefined,
+  hotelLink: undefined,
+  tripId: undefined,
+  tripPlace: [],
 });
-const newIngredient = ref({
+const newPlace = ref({
   id: undefined,
-  quantity: undefined,
-  recipeId: undefined,
-  recipeStepId: undefined,
-  ingredientId: undefined,
+  duration: undefined,
+  tripId: undefined,
+  dayId: undefined,
+  placeId: undefined,
 });
 
 onMounted(async () => {
-  await getRecipe();
-  await getRecipeIngredients();
-  await getIngredients();
-  await getRecipeSteps();
+  await getTrip();
+  await getTripPlaces();
+  await getPlaces();
+  await getDays();
 });
 
-async function getRecipe() {
-  await RecipeServices.getRecipe(route.params.id)
+async function getTrip() {
+  await TripServices.getTrip(route.params.id)
     .then((response) => {
-      recipe.value = response.data[0];
+      trip.value = response.data[0];
     })
     .catch((error) => {
       console.log(error);
     });
 }
 
-async function updateRecipe() {
-  await RecipeServices.updateRecipe(recipe.value.id, recipe.value)
+async function updateTrip() {
+  await TripServices.updateTrip(trip.value.id, trip.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${recipe.value.name} updated successfully!`;
+      snackbar.value.text = `${trip.value.name} updated successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -67,13 +72,13 @@ async function updateRecipe() {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getRecipe();
+  await getTrip();
 }
 
-async function getIngredients() {
-  await IngredientServices.getIngredients()
+async function getPlaces() {
+  await PlaceServices.getPlaces()
     .then((response) => {
-      ingredients.value = response.data;
+      places.value = response.data;
     })
     .catch((error) => {
       console.log(error);
@@ -83,26 +88,26 @@ async function getIngredients() {
     });
 }
 
-async function getRecipeIngredients() {
-  await RecipeIngredientServices.getRecipeIngredientsForRecipe(route.params.id)
+async function getTripPlaces() {
+  await TripPlaceServices.getTripPlacesForTrip(route.params.id)
     .then((response) => {
-      recipeIngredients.value = response.data;
+      tripPlaces.value = response.data;
     })
     .catch((error) => {
       console.log(error);
     });
 }
 
-async function addIngredient() {
-  isAddIngredient.value = false;
-  newIngredient.value.recipeId = recipe.value.id;
-  newIngredient.value.ingredientId = selectedIngredient.value.id;
-  delete newIngredient.value.id;
-  await RecipeIngredientServices.addRecipeIngredient(newIngredient.value)
+async function addPlace() {
+  isAddPlace.value = false;
+  newPlace.value.tripId = trip.value.id;
+  newPlace.value.placeId = selectedPlace.value.id;
+  delete newPlace.value.id;
+  await TripPlaceServices.addTripPlace(newPlace.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `Ingredient added successfully!`;
+      snackbar.value.text = `Place added successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -110,20 +115,20 @@ async function addIngredient() {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getRecipeIngredients();
+  await getTripPlaces();
 }
 
-async function updateIngredient() {
-  isEditIngredient.value = false;
-  newIngredient.value.recipeId = recipe.value.id;
-  newIngredient.value.ingredientId = selectedIngredient.value.id;
-  console.log(newIngredient);
+async function updatePlace() {
+  isEditPlace.value = false;
+  newPlace.value.tripId = trip.value.id;
+  newPlace.value.placeId = selectedPlace.value.id;
+  console.log(newPlace);
 
-  await RecipeIngredientServices.updateRecipeIngredient(newIngredient.value)
+  await TripPlaceServices.updateTripPlace(newPlace.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${selectedIngredient.value.name} updated successfully!`;
+      snackbar.value.text = `${selectedPlace.value.name} updated successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -131,15 +136,15 @@ async function updateIngredient() {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getRecipeIngredients();
+  await getTripPlaces();
 }
 
-async function deleteIngredient(ingredient) {
-  await RecipeIngredientServices.deleteRecipeIngredient(ingredient)
+async function deletePlace(place) {
+  await TripPlaceServices.deleteTripPlace(place)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${ingredient.ingredient.name} deleted successfully!`;
+      snackbar.value.text = `${place.place.name} deleted successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -147,29 +152,29 @@ async function deleteIngredient(ingredient) {
       snackbar.value.color = "error";
       snackbar.value.text = error.response.data.message;
     });
-  await getRecipeIngredients();
+  await getTripPlaces();
 }
 
-async function checkUpdateIngredient() {
-  if (newStep.value.recipeIngredient.length > 0) {
-    console.log(newStep.value.recipeIngredient);
-    for (let i = 0; i < newStep.value.recipeIngredient.length; i++) {
-      newIngredient.value.id = newStep.value.recipeIngredient[i].id;
-      newIngredient.value.quantity = newStep.value.recipeIngredient[i].quantity;
-      newIngredient.value.recipeStepId = newStep.value.id;
-      selectedIngredient.value.id =
-        newStep.value.recipeIngredient[i].ingredientId;
-      await updateIngredient();
+async function checkUpdatePlace() {
+  if (newDay.value.tripPlace.length > 0) {
+    console.log(newDay.value.tripPlace);
+    for (let i = 0; i < newDay.value.tripPlace.length; i++) {
+      newPlace.value.id = newDay.value.tripPlace[i].id;
+      newPlace.value.duration = newDay.value.tripPlace[i].duration;
+      newPlace.value.dayId = newDay.value.id;
+      selectedPlace.value.id =
+        newDay.value.tripPlace[i].placeId;
+      await updatePlace();
     }
   }
 }
 
-async function getRecipeSteps() {
-  await RecipeStepServices.getRecipeStepsForRecipeWithIngredients(
+async function getDays() {
+  await DayServices.getDaysForTripWithPlaces(
     route.params.id
   )
     .then((response) => {
-      recipeSteps.value = response.data;
+      days.value = response.data;
     })
     .catch((error) => {
       console.log(error);
@@ -178,11 +183,11 @@ async function getRecipeSteps() {
 
 async function addStep() {
   isAddStep.value = false;
-  newStep.value.recipeId = recipe.value.id;
-  delete newStep.value.id;
-  await RecipeStepServices.addRecipeStep(newStep.value)
+  newDay.value.tripId = trip.value.id;
+  delete newDay.value.id;
+  await DayServices.addDay(newDay.value)
     .then((data) => {
-      newStep.value.id = data.data.id;
+      newDay.value.id = data.data.id;
       snackbar.value.value = true;
       snackbar.value.color = "green";
       snackbar.value.text = `Step added successfully!`;
@@ -194,14 +199,14 @@ async function addStep() {
       snackbar.value.text = error.response.data.message;
     });
 
-  await checkUpdateIngredient();
+  await checkUpdatePlace();
 
-  await getRecipeSteps();
+  await getDays();
 }
 
 async function updateStep() {
   isEditStep.value = false;
-  await RecipeStepServices.updateRecipeStep(newStep.value)
+  await DayServices.updateDay(newDay.value)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
@@ -214,13 +219,13 @@ async function updateStep() {
       snackbar.value.text = error.response.data.message;
     });
 
-  await checkUpdateIngredient();
+  await checkUpdatePlace();
 
-  await getRecipeSteps();
+  await getDays();
 }
 
 async function deleteStep(step) {
-  await RecipeStepServices.deleteRecipeStep(step)
+  await DayServices.deleteDay(step)
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
@@ -233,49 +238,59 @@ async function deleteStep(step) {
       snackbar.value.text = error.response.data.message;
     });
 
-  await getRecipeSteps();
+  await getDays();
 }
 
-function openAddIngredient() {
-  newIngredient.value.id = undefined;
-  newIngredient.value.quantity = undefined;
-  newIngredient.value.recipeStepId = undefined;
-  newIngredient.value.ingredientId = undefined;
-  selectedIngredient.value = undefined;
-  isAddIngredient.value = true;
+function openAddPlace() {
+  newPlace.value.id = undefined;
+  newPlace.value.duration = undefined;
+  newPlace.value.dayId = undefined;
+  newPlace.value.placeId = undefined;
+  selectedPlace.value = undefined;
+  isAddPlace.value = true;
 }
 
-function openEditIngredient(ingredient) {
-  newIngredient.value.id = ingredient.id;
-  newIngredient.value.quantity = ingredient.quantity;
-  newIngredient.value.recipeStepId = ingredient.recipeStepId;
-  newIngredient.value.ingredientId = ingredient.ingredientId;
-  selectedIngredient.value = ingredient.ingredient;
-  isEditIngredient.value = true;
+function openEditPlace(place) {
+  newPlace.value.id = place.id;
+  newPlace.value.duration = place.quantity;
+  newPlace.value.dayId = place.dayId;
+  newPlace.value.placeId = place.placeId;
+  selectedPlace.value = place.place;
+  isEditPlace.value = true;
 }
 
 function openAddStep() {
-  newStep.value.id = undefined;
-  newStep.value.stepNumber = undefined;
-  newStep.value.instruction = undefined;
-  newStep.value.recipeIngredient = [];
+  newDay.value.id = undefined;
+  newDay.value.day = undefined;
+  newDay.value.weekday = undefined;
+  newDay.value.description = undefined;
+  newDay.value.hotelName = undefined;
+  newDay.value.hotelAddress = undefined;
+  newDay.value.hotelPhone = undefined;
+  newDay.value.hotelLink = undefined;
+  newDay.value.tripPlace = [];
   isAddStep.value = true;
 }
 
 function openEditStep(step) {
-  newStep.value.id = step.id;
-  newStep.value.stepNumber = step.stepNumber;
-  newStep.value.instruction = step.instruction;
-  newStep.value.recipeIngredient = step.recipeIngredient;
+  newDay.value.id = step.id;
+  newDay.value.day = step.day;
+  newDay.value.weekday = step.weekday;
+  newDay.value.description = step.description;
+  newDay.value.hotelName = step.hotelName;
+  newDay.value.hotelAddress = step.hotelAddress;
+  newDay.value.hotelPhone = step.hotelPhone;
+  newDay.value.hotelLink = step.hotelLink;
+  newDay.value.tripPlace = step.tripPlace;
   isEditStep.value = true;
 }
 
-function closeAddIngredient() {
-  isAddIngredient.value = false;
+function closeAddPlace() {
+  isAddPlace.value = false;
 }
 
-function closeEditIngredient() {
-  isEditIngredient.value = false;
+function closeEditPlace() {
+  isEditPlace.value = false;
 }
 
 function closeAddStep() {
@@ -296,7 +311,7 @@ function closeSnackBar() {
     <v-row align="center">
       <v-col cols="10"
         ><v-card-title class="pl-0 text-h4 font-weight-bold"
-          >Edit Recipe
+          >Edit Trip
         </v-card-title>
       </v-col>
     </v-row>
@@ -307,30 +322,24 @@ function closeSnackBar() {
             <v-row>
               <v-col>
                 <v-text-field
-                  v-model="recipe.name"
+                  v-model="trip.name"
                   label="Name"
                   required
                 ></v-text-field>
                 <v-text-field
-                  v-model.number="recipe.servings"
-                  label="Number of Servings"
-                  type="number"
+                  v-model="trip.startDate"
+                  label="Stard Date"
+                  type="Date"
                 ></v-text-field>
                 <v-text-field
-                  v-model.number="recipe.time"
-                  label="Time to Make (in minutes)"
-                  type="number"
+                  v-model="trip.endDate"
+                  label="End Date"
+                  type="Date"
                 ></v-text-field>
-                <v-switch
-                  v-model="recipe.isPublished"
-                  hide-details
-                  inset
-                  :label="`Publish? ${recipe.isPublished ? 'Yes' : 'No'}`"
-                ></v-switch>
               </v-col>
               <v-col>
                 <v-textarea
-                  v-model="recipe.description"
+                  v-model="trip.description"
                   rows="10"
                   label="Description"
                 ></v-textarea>
@@ -338,8 +347,8 @@ function closeSnackBar() {
             </v-row>
           </v-card-text>
           <v-card-actions class="pt-0">
-            <v-btn variant="flat" color="primary" @click="updateRecipe()"
-              >Update Recipe</v-btn
+            <v-btn variant="flat" color="primary" @click="updateTrip()"
+              >Update Trip</v-btn
             >
             <v-spacer></v-spacer>
           </v-card-actions>
@@ -352,43 +361,39 @@ function closeSnackBar() {
           <v-card-title
             ><v-row align="center">
               <v-col cols="10"
-                ><v-card-title class="headline">Ingredients </v-card-title>
+                ><v-card-title class="headline">Places </v-card-title>
               </v-col>
               <v-col class="d-flex justify-end" cols="2">
-                <v-btn color="accent" @click="openAddIngredient()">Add</v-btn>
+                <v-btn color="accent" @click="openAddPlace()">Add</v-btn>
               </v-col>
             </v-row>
           </v-card-title>
           <v-card-text>
             <v-list>
               <v-list-item
-                v-for="recipeIngredient in recipeIngredients"
-                :key="recipeIngredient.id"
+                v-for="tripPlace in tripPlaces"
+                :key="tripPlace.id"
               >
                 <b
-                  >{{ recipeIngredient.quantity }}
-                  {{
-                    `${recipeIngredient.ingredient.unit}${
-                      recipeIngredient.quantity > 1 ? "s" : ""
-                    }`
-                  }}</b
+                  >{{ tripPlace.duration }}   hours
+                 </b
                 >
-                of {{ recipeIngredient.ingredient.name }} (${{
-                  recipeIngredient.ingredient.pricePerUnit
-                }}/{{ recipeIngredient.ingredient.unit }})
+                at  {{ tripPlace.place.name }} {{
+                  tripPlace.place.link
+                }}
                 <template v-slot:append>
                   <v-row>
                     <v-icon
                       class="mx-2"
                       size="x-small"
                       icon="mdi-pencil"
-                      @click="openEditIngredient(recipeIngredient)"
+                      @click="openEditPlace(tripPlace)"
                     ></v-icon>
                     <v-icon
                       class="mx-2"
                       size="x-small"
                       icon="mdi-trash-can"
-                      @click="deleteIngredient(recipeIngredient)"
+                      @click="deletePlace(tripPlace)"
                     ></v-icon>
                   </v-row>
                 </template>
@@ -414,16 +419,21 @@ function closeSnackBar() {
           <v-card-text>
             <v-table>
               <tbody>
-                <tr v-for="step in recipeSteps" :key="step.id">
-                  <td>{{ step.stepNumber }}</td>
-                  <td>{{ step.instruction }}</td>
+                <tr v-for="day in days" :key="day.id">
+                  <td>{{ day.date }}</td>
+                  <td>{{ day.weekday }}</td>
+                  <td>{{ day.description }}</td>
+                  <td>{{ day.hotelName }}</td>
+                  <td>{{ day.hotelAddress }}</td>
+                  <td>{{ day.hotelPhone }}</td>
+                  <td>{{ day.hotelLink }}</td>
                   <td>
                     <v-chip
                       size="small"
-                      v-for="ingredient in step.recipeIngredient"
-                      :key="ingredient.id"
+                      v-for="place in day.tripPlace"
+                      :key="place.id"
                       pill
-                      >{{ ingredient.ingredient.name }}</v-chip
+                      >{{ place.place.name }}</v-chip
                     >
                   </td>
                   <td>
@@ -450,23 +460,23 @@ function closeSnackBar() {
 
     <v-dialog
       persistent
-      :model-value="isAddIngredient || isEditIngredient"
+      :model-value="isAddPlace || isEditPlace"
       width="800"
     >
       <v-card class="rounded-lg elevation-5">
         <v-card-title class="headline mb-2">{{
-          isAddIngredient
-            ? "Add Ingredient"
-            : isEditIngredient
-            ? "Edit Ingredient"
+          isAddPlace
+            ? "Add Place"
+            : isEditPlace
+            ? "Edit Place"
             : ""
         }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="3">
               <v-text-field
-                v-model="newIngredient.quantity"
-                label="Quantity"
+                v-model="newPlace.duration"
+                label="Duration (hours)"
                 type="number"
                 required
               >
@@ -475,23 +485,23 @@ function closeSnackBar() {
 
             <v-col>
               <v-select
-                v-model="selectedIngredient"
-                :items="ingredients"
+                v-model="selectedPlace"
+                :items="places"
                 item-title="name"
-                item-value="unit"
-                label="Ingredients"
+                item-value="description"
+                label="Places"
                 return-object
                 required
               >
                 <template v-slot:prepend>
                   {{
                     `${
-                      selectedIngredient && selectedIngredient.unit
-                        ? selectedIngredient.unit
+                      selectedPlace && selectedPlace.description
+                        ? selectedPlace.description
                         : ""
-                    }${newIngredient.quantity > 1 ? "s" : ""}`
+                    }${newPlace.duration > 1 ? " hours" : ""}`
                   }}
-                  of
+                  at
                 </template>
               </v-select>
             </v-col>
@@ -503,10 +513,10 @@ function closeSnackBar() {
             variant="flat"
             color="secondary"
             @click="
-              isAddIngredient
-                ? closeAddIngredient()
-                : isEditIngredient
-                ? closeEditIngredient()
+              isAddPlace
+                ? closeAddPlace()
+                : isEditPlace
+                ? closeEditPlace()
                 : false
             "
             >Close</v-btn
@@ -515,17 +525,17 @@ function closeSnackBar() {
             variant="flat"
             color="primary"
             @click="
-              isAddIngredient
-                ? addIngredient()
-                : isEditIngredient
-                ? updateIngredient()
+              isAddPlace
+                ? addPlace()
+                : isEditPlace
+                ? updatePlace()
                 : false
             "
             >{{
-              isAddIngredient
-                ? "Add Ingredient"
-                : isEditIngredient
-                ? "Update Ingredient"
+              isAddPlace
+                ? "Add Place"
+                : isEditPlace
+                ? "Update Place"
                 : ""
             }}</v-btn
           >
@@ -540,24 +550,54 @@ function closeSnackBar() {
         </v-card-title>
         <v-card-text>
           <v-text-field
-            v-model="newStep.stepNumber"
-            label="Number"
-            type="number"
+            v-model="newDay.date"
+            label="Date"
+            type="Date"
             required
           ></v-text-field>
 
           <v-textarea
-            v-model="newStep.instruction"
-            label="Instruction"
+            v-model="newDay.weekday"
+            label="Day"
+            required
+          ></v-textarea>
+
+          <v-textarea
+            v-model="newDay.description"
+            label="Description"
+            required
+          ></v-textarea>
+
+          <v-textarea
+            v-model="newDay.hotelName"
+            label="HotelName"
+            required
+          ></v-textarea>
+
+          <v-textarea
+            v-model="newDay.hotelAddress"
+            label="HotelAddress"
+            required
+          ></v-textarea>
+
+          <v-textarea
+            v-model="newDay.hotelPhone"
+            label="HotelPhone"
+            required
+          ></v-textarea>
+
+          <v-textarea
+            v-model="newDay.hotelLink"
+            label="HotelLink"
             required
           ></v-textarea>
 
           <v-select
-            v-model="newStep.recipeIngredient"
-            :items="recipeIngredients"
-            item-title="ingredient.name"
+            v-model="newDay.tripPlace"
+            :items="tripPlaces"
+            item-title="place.name"
             item-value="id"
-            label="Ingredients"
+            label="Places"
             return-object
             multiple
             chips
