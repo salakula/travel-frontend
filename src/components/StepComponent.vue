@@ -2,7 +2,7 @@
 import { onMounted } from "vue";
 
 const props = defineProps({
-  recipeStep: {
+  day: {
     required: true,
   },
 });
@@ -23,25 +23,25 @@ const handleDelete = (event) => {
 
 <template>
   <v-list-item>
-    {{ recipeStep.stepNumber }}
+    {{ day.stepNumber }}
 
-    {{ recipeStep.instruction }}
+    {{ day.instruction }}
 
     <template v-slot:append>
       <v-icon
         size="x-small"
         icon="mdi-pencil"
-        @click="handleUpdate(recipeStep)"
+        @click="handleUpdate(day)"
       ></v-icon>
       <v-icon
         size="x-small"
         icon="mdi-trash-can"
-        @click="handleDelete(recipeStep)"
+        @click="handleDelete(day)"
       ></v-icon>
     </template>
 
     <v-row>
-      <!-- {{ recipeStep.recipeIngredient }} -->
+      <!-- {{ day.tripPlace }} -->
     </v-row>
   </v-list-item>
 </template>
