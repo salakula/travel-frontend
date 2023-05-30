@@ -440,14 +440,14 @@ function closeSnackBar() {
                     <v-icon
                       size="x-small"
                       icon="mdi-pencil"
-                      @click="openEditStep(step)"
+                      @click="openEditStep(day)"
                     ></v-icon>
                   </td>
                   <td>
                     <v-icon
                       size="x-small"
                       icon="mdi-trash-can"
-                      @click="deleteStep(step)"
+                      @click="deleteStep(day)"
                     >
                     </v-icon>
                   </td>
