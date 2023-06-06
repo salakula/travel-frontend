@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, defineProps, defineEmits } from "vue";
 
 const props = defineProps({
   day: {
@@ -23,25 +23,18 @@ const handleDelete = (event) => {
 
 <template>
   <v-list-item>
-    {{ day.stepNumber }}
-
-    {{ day.instruction }}
+    <v-list-item-content>
+      <v-list-item-title>{{ day.stepNumber }}</v-list-item-title>
+      <v-list-item-subtitle>{{ day.instruction }}</v-list-item-subtitle>
+    </v-list-item-content>
 
     <template v-slot:append>
-      <v-icon
-        size="x-small"
-        icon="mdi-pencil"
-        @click="handleUpdate(day)"
-      ></v-icon>
-      <v-icon
-        size="x-small"
-        icon="mdi-trash-can"
-        @click="handleDelete(day)"
-      ></v-icon>
+      <v-btn icon @click="handleUpdate(day)">
+        <v-icon small>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn icon @click="handleDelete(day)">
+        <v-icon small>mdi-trash-can</v-icon>
+      </v-btn>
     </template>
-
-    <v-row>
-      <!-- {{ day.tripPlace }} -->
-    </v-row>
   </v-list-item>
 </template>
