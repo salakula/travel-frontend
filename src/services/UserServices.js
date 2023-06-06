@@ -1,14 +1,13 @@
 import apiClient from "./services";
 
 export default {
-  getUser() {
+  getUsers() {
     return apiClient.get("users");
   },
   addUser(user) {
     return apiClient.post("users", user);
   },
   loginUser(user) {
-    console.log(user);
     return apiClient.post("login", user.value, {
       headers: {
         Accept: "application/json",
@@ -23,4 +22,7 @@ export default {
   logoutUser() {
     return apiClient.post("logout");
   },
+  makeAdmin(user) {
+    return apiClient.put("users/" + user.id, user);
+  }
 };
