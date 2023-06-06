@@ -1,5 +1,4 @@
 <script setup>
-import ocLogo from "/oc_logo.png";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import UserServices from "../services/UserServices";
@@ -8,10 +7,8 @@ const router = useRouter();
 
 const user = ref(null);
 const title = ref("Travel Itinerary");
-const logoURL = ref("");
 
 onMounted(() => {
-  logoURL.value = ocLogo;
   user.value = JSON.parse(localStorage.getItem("user"));
 });
 
@@ -30,24 +27,9 @@ function logout() {
 </script>
 
 <template>
-  <div>
-    <v-app-bar color="primary" app dark>
-      <router-link :to="{ name: 'trips' }">
-        <v-img
-          class="mx-2"
-          :src="logoURL"
-          height="50"
-          width="50"
-          contain
-        ></v-img>
-      </router-link>
-      <v-toolbar-title class="title">
-        {{ title }}
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn class="mx-2" :to="{ name: 'trips' }"> Trips </v-btn>
-      <v-btn v-if="user === null" class="mx-2" :to="{ name: 'login' }">
-        Login
+  <div v-if="fasle" class="menu-bar">
+      <v-btn v-if="user !== null" class="mx-2" :to="{ name: 'trips' }">
+        Trips
       </v-btn>
       <v-btn v-if="user !== null" class="mx-2" :to="{ name: 'places' }">
         Places
@@ -80,6 +62,6 @@ function logout() {
           </v-card-text>
         </v-card>
       </v-menu>
-    </v-app-bar>
   </div>
 </template>
+
