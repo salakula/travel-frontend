@@ -14,6 +14,16 @@ const router = createRouter({
       component: () => import("./views/TripList.vue"),
     },
     {
+      path: "/user",
+      name: "user",
+      component: () => import("./views/UserDashboard.vue"),
+    },
+    {
+      path: "/admin",
+      name: "admin",
+      component: () => import("./views/AdminDashboard.vue"),
+    },
+    {
       path: "/trip/:id",
       name: "editTrip",
       props: true,
