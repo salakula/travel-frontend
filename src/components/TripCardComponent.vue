@@ -10,6 +10,7 @@ const showDetails = ref(false);
 const tripPlaces = ref([]);
 const days = ref([]);
 const user = ref(null);
+const isAdmin = ref(false);
 
 const props = defineProps({
   trip: {
@@ -21,6 +22,10 @@ onMounted(async () => {
   await getTripPlaces();
   await getDays();
   user.value = JSON.parse(localStorage.getItem("user"));
+  console.log(user.value);
+  if (user.value !== null && user.value.role === "admin") {
+    isAdmin.value = true;
+  }
 });
 
 async function getTripPlaces() {
@@ -69,7 +74,7 @@ function navigateToEdit() {
         </v-col>
         <v-col class="d-flex justify-end">
           <v-icon
-            v-if="user !== null"
+            v-if="isAdmin"
             size="small"
             icon="mdi-pencil"
             @click="navigateToEdit()"
