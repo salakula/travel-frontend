@@ -3,9 +3,15 @@ import { onMounted } from "vue";
 import { ref } from "vue";
 import TripCard from "../components/TripCardComponent.vue";
 import TripServices from "../services/TripServices.js";
+import { useRouter } from "vue-router";
+import UserServices from "../services/UserServices.js";
+
+
+const router = useRouter();
 
 const trips = ref([]);
 const isAdd = ref(false);
+const title = ref("Travel Itinerary");
 const user = ref(null);
 const snackbar = ref({
   value: false,
@@ -50,6 +56,12 @@ async function addTrip() {
     snackbar.value.value = true;
     snackbar.value.color = "success";
     snackbar.value.text = `${newTrip.value.name} added successfully!`;
+    newTrip.value = {
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+    };
   } catch (error) {
     console.log(error);
     snackbar.value.value = true;
@@ -67,6 +79,19 @@ function closeAdd() {
   isAdd.value = false;
 }
 
+function logout() {
+    UserServices.logoutUser()
+        .then((data) => {
+            console.log(data);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    localStorage.removeItem("user");
+    user.value = null;
+    router.push({ name: "login" });
+}
+
 function closeSnackBar() {
   snackbar.value.value = false;
 }
@@ -74,13 +99,19 @@ function closeSnackBar() {
 
 <template>
   <v-container>
+    <v-app-bar color="teal" prominent>
+        <v-app-bar-title>{{ title }}</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-btn  color="white" @click="logout()" text >Logout</v-btn>
+    </v-app-bar>
+
     <div id="body">
       <v-row align="center" class="mb-4">
         <v-col cols="10">
           <v-card-title class="pl-0 text-h4 font-weight-bold">Trips</v-card-title>
         </v-col>
         <v-col class="d-flex justify-end" cols="2">
-          <v-btn v-if="user !== null" color="primary" @click="openAdd">Add</v-btn>
+          <v-btn v-if="false" color="teal" prepend-icon="mdi-plus" @click="openAdd">Add</v-btn>
         </v-col>
       </v-row>
 
@@ -103,8 +134,8 @@ function closeSnackBar() {
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" @click="closeAdd">Close</v-btn>
-            <v-btn color="primary" @click="addTrip">Add Trip</v-btn>
+            <v-btn  @click="closeAdd">Close</v-btn>
+            <v-btn color="teal" variant="flat" @click="addTrip">Add Trip</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

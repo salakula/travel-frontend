@@ -1,12 +1,13 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import PlaceServices from "../services/PlaceServices.js";
 import TripPlaceServices from "../services/TripPlaceServices";
 import DayServices from "../services/DayServices";
 import TripServices from "../services/TripServices";
 
 const route = useRoute();
+const router = useRouter();
 
 const trip = ref({});
 const places = ref([]);
@@ -301,6 +302,25 @@ function closeEditStep() {
   isEditStep.value = false;
 }
 
+
+function deleteTrip() {
+  if (confirm("Are you sure you want to delete trip?") === true)
+  {
+    TripServices.deleteTrip(trip.value.id)
+      .then(() => {
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `${trip.value.name} deleted successfully!`;
+        router.back();
+      })
+      .catch((error) => {
+        console.log(error);
+        snackbar.value.value = true;
+        snackbar.value.color = "error";
+        snackbar.value.text = error.response.data.message;
+      });
+  }
+}
 function closeSnackBar() {
   snackbar.value.value = false;
 }
@@ -308,49 +328,28 @@ function closeSnackBar() {
 
 <template>
   <v-container>
-    <v-row align="center">
-      <v-col cols="10"
-        ><v-card-title class="pl-0 text-h4 font-weight-bold"
-          >Edit Trip
-        </v-card-title>
-      </v-col>
-    </v-row>
+    <v-app-bar color="teal" prominent>
+      <v-app-bar-title>Edit Trip</v-app-bar-title>
+    </v-app-bar>
     <v-row>
       <v-col>
         <v-card class="rounded-lg elevation-5">
           <v-card-text>
             <v-row>
               <v-col>
-                <v-text-field
-                  v-model="trip.name"
-                  label="Name"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="trip.startDate"
-                  label="Stard Date"
-                  type="Date"
-                ></v-text-field>
-                <v-text-field
-                  v-model="trip.endDate"
-                  label="End Date"
-                  type="Date"
-                ></v-text-field>
+                <v-text-field v-model="trip.name" label="Name" required></v-text-field>
+                <v-text-field v-model="trip.startDate" label="Stard Date" type="Date"></v-text-field>
+                <v-text-field v-model="trip.endDate" label="End Date" type="Date"></v-text-field>
               </v-col>
               <v-col>
-                <v-textarea
-                  v-model="trip.description"
-                  rows="10"
-                  label="Description"
-                ></v-textarea>
+                <v-textarea v-model="trip.description" rows="10" label="Description"></v-textarea>
               </v-col>
             </v-row>
           </v-card-text>
           <v-card-actions class="pt-0">
-            <v-btn variant="flat" color="primary" @click="updateTrip()"
-              >Update Trip</v-btn
-            >
+            <v-btn variant="flat" color="teal" @click="updateTrip()">Update Trip</v-btn>
             <v-spacer></v-spacer>
+            <v-btn variant="flat" color="red" @click="deleteTrip()">Delete trip</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -358,43 +357,26 @@ function closeSnackBar() {
     <v-row>
       <v-col>
         <v-card class="rounded-lg elevation-5">
-          <v-card-title
-            ><v-row align="center">
-              <v-col cols="10"
-                ><v-card-title class="headline">Places </v-card-title>
+          <v-card-title><v-row align="center">
+              <v-col cols="10"><v-card-title class="headline">Places </v-card-title>
               </v-col>
               <v-col class="d-flex justify-end" cols="2">
-                <v-btn color="accent" @click="openAddPlace()">Add</v-btn>
+                <v-btn color="teal" @click="openAddPlace()">Add</v-btn>
               </v-col>
             </v-row>
           </v-card-title>
           <v-card-text>
             <v-list>
-              <v-list-item
-                v-for="tripPlace in tripPlaces"
-                :key="tripPlace.id"
-              >
-                <b
-                  >{{ tripPlace.duration }}   hours
-                 </b
-                >
-                at  {{ tripPlace.place.name }} {{
+              <v-list-item v-for="tripPlace in tripPlaces" :key="tripPlace.id">
+                <b>{{ tripPlace.duration }} hours
+                </b>
+                at {{ tripPlace.place.name }} {{
                   tripPlace.place.link
                 }}
                 <template v-slot:append>
                   <v-row>
-                    <v-icon
-                      class="mx-2"
-                      size="x-small"
-                      icon="mdi-pencil"
-                      @click="openEditPlace(tripPlace)"
-                    ></v-icon>
-                    <v-icon
-                      class="mx-2"
-                      size="x-small"
-                      icon="mdi-trash-can"
-                      @click="deletePlace(tripPlace)"
-                    ></v-icon>
+                    <v-icon class="mx-2" size="x-small" icon="mdi-pencil" @click="openEditPlace(tripPlace)"></v-icon>
+                    <v-icon class="mx-2" size="x-small" icon="mdi-trash-can" @click="deletePlace(tripPlace)"></v-icon>
                   </v-row>
                 </template>
               </v-list-item>
@@ -406,13 +388,11 @@ function closeSnackBar() {
     <v-row>
       <v-col>
         <v-card class="rounded-lg elevation-5">
-          <v-card-title
-            ><v-row align="center">
-              <v-col cols="10"
-                ><v-card-title class="headline">Steps </v-card-title>
+          <v-card-title><v-row align="center">
+              <v-col cols="10"><v-card-title class="headline">Steps </v-card-title>
               </v-col>
               <v-col class="d-flex justify-end" cols="2">
-                <v-btn color="accent" @click="openAddStep()">Add</v-btn>
+                <v-btn color="teal" @click="openAddStep()">Add</v-btn>
               </v-col>
             </v-row>
           </v-card-title>
@@ -428,77 +408,46 @@ function closeSnackBar() {
                   <td>{{ day.hotelPhone }}</td>
                   <td>{{ day.hotelLink }}</td>
                   <td>
-                    <v-chip
-                      size="small"
-                      v-for="place in day.tripPlace"
-                      :key="place.id"
-                      pill
-                      >{{ place.place.name }}</v-chip
-                    >
+                    <v-chip size="small" v-for="place in day.tripPlace" :key="place.id" pill>{{ place.place.name
+                    }}</v-chip>
                   </td>
                   <td>
-                    <v-icon
-                      size="x-small"
-                      icon="mdi-pencil"
-                      @click="openEditStep(day)"
-                    ></v-icon>
+                    <v-icon size="x-small" icon="mdi-pencil" @click="openEditStep(day)"></v-icon>
                   </td>
                   <td>
-                    <v-icon
-                      size="x-small"
-                      icon="mdi-trash-can"
-                      @click="deleteStep(day)"
-                    >
+                    <v-icon size="x-small" icon="mdi-trash-can" @click="deleteStep(day)">
                     </v-icon>
                   </td>
                 </tr>
               </tbody>
             </v-table>
-          </v-card-text> </v-card
-      ></v-col>
+          </v-card-text> </v-card></v-col>
     </v-row>
 
-    <v-dialog
-      persistent
-      :model-value="isAddPlace || isEditPlace"
-      width="800"
-    >
+    <v-dialog persistent :model-value="isAddPlace || isEditPlace" width="800">
       <v-card class="rounded-lg elevation-5">
         <v-card-title class="headline mb-2">{{
           isAddPlace
-            ? "Add Place"
-            : isEditPlace
+          ? "Add Place"
+          : isEditPlace
             ? "Edit Place"
             : ""
         }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="3">
-              <v-text-field
-                v-model="newPlace.duration"
-                label="Duration (hours)"
-                type="number"
-                required
-              >
+              <v-text-field v-model="newPlace.duration" label="Duration (hours)" type="number" required>
               </v-text-field>
             </v-col>
 
             <v-col>
-              <v-select
-                v-model="selectedPlace"
-                :items="places"
-                item-title="name"
-                item-value="description"
-                label="Places"
-                return-object
-                required
-              >
+              <v-select v-model="selectedPlace" :items="places" item-title="name" item-value="description" label="Places"
+                return-object required>
                 <template v-slot:prepend>
                   {{
-                    `${
-                      selectedPlace && selectedPlace.description
-                        ? selectedPlace.description
-                        : ""
+                    `${selectedPlace && selectedPlace.description
+                      ? selectedPlace.description
+                      : ""
                     }${newPlace.duration > 1 ? " hours" : ""}`
                   }}
                   at
@@ -509,36 +458,26 @@ function closeSnackBar() {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            variant="flat"
-            color="secondary"
-            @click="
-              isAddPlace
-                ? closeAddPlace()
-                : isEditPlace
+          <v-btn variant="flat" color="white" @click="
+            isAddPlace
+              ? closeAddPlace()
+              : isEditPlace
                 ? closeEditPlace()
                 : false
-            "
-            >Close</v-btn
-          >
-          <v-btn
-            variant="flat"
-            color="primary"
-            @click="
-              isAddPlace
-                ? addPlace()
-                : isEditPlace
+          ">Close</v-btn>
+          <v-btn variant="flat" color="teal" @click="
+            isAddPlace
+              ? addPlace()
+              : isEditPlace
                 ? updatePlace()
                 : false
-            "
-            >{{
-              isAddPlace
-                ? "Add Place"
-                : isEditPlace
-                ? "Update Place"
-                : ""
-            }}</v-btn
-          >
+          ">{{
+  isAddPlace
+  ? "Add Place"
+  : isEditPlace
+    ? "Update Place"
+    : ""
+}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -549,79 +488,31 @@ function closeSnackBar() {
           {{ isAddStep ? "Add Step" : isEditStep ? "Edit Step" : "" }}
         </v-card-title>
         <v-card-text>
-          <v-text-field
-            v-model="newDay.date"
-            label="Date"
-            type="Date"
-            required
-          ></v-text-field>
+          <v-text-field v-model="newDay.date" label="Date" type="Date" required></v-text-field>
 
-          <v-textarea
-            v-model="newDay.weekday"
-            label="Day"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.weekday" label="Day" required></v-textarea>
 
-          <v-textarea
-            v-model="newDay.description"
-            label="Description"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.description" label="Description" required></v-textarea>
 
-          <v-textarea
-            v-model="newDay.hotelName"
-            label="HotelName"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.hotelName" label="HotelName" required></v-textarea>
 
-          <v-textarea
-            v-model="newDay.hotelAddress"
-            label="HotelAddress"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.hotelAddress" label="HotelAddress" required></v-textarea>
 
-          <v-textarea
-            v-model="newDay.hotelPhone"
-            label="HotelPhone"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.hotelPhone" label="HotelPhone" required></v-textarea>
 
-          <v-textarea
-            v-model="newDay.hotelLink"
-            label="HotelLink"
-            required
-          ></v-textarea>
+          <v-textarea v-model="newDay.hotelLink" label="HotelLink" required></v-textarea>
 
-          <v-select
-            v-model="newDay.tripPlace"
-            :items="tripPlaces"
-            item-title="place.name"
-            item-value="id"
-            label="Places"
-            return-object
-            multiple
-            chips
-            required
-          ></v-select>
+          <v-select v-model="newDay.tripPlace" :items="tripPlaces" item-title="place.name" item-value="id" label="Places"
+            return-object multiple chips required></v-select>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            variant="flat"
-            color="secondary"
-            @click="
-              isAddStep ? closeAddStep() : isEditStep ? closeEditStep() : false
-            "
-            >Close</v-btn
-          >
-          <v-btn
-            variant="flat"
-            color="primary"
-            @click="isAddStep ? addStep() : isEditStep ? updateStep() : false"
-            >{{
-              isAddStep ? "Add Step" : isEditStep ? "Update Step" : ""
-            }}</v-btn
-          >
+          <v-btn variant="flat" color="white" @click="
+            isAddStep ? closeAddStep() : isEditStep ? closeEditStep() : false
+          ">Close</v-btn>
+          <v-btn variant="flat" color="teal" @click="isAddStep ? addStep() : isEditStep ? updateStep() : false">{{
+            isAddStep ? "Add Step" : isEditStep ? "Update Step" : ""
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
