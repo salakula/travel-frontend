@@ -5,6 +5,7 @@ import PlaceServices from "../services/PlaceServices.js";
 import TripPlaceServices from "../services/TripPlaceServices";
 import DayServices from "../services/DayServices";
 import TripServices from "../services/TripServices";
+import HotelServices from "../services/HotelServices";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,12 +29,9 @@ const newDay = ref({
   day: undefined,
   weekday: undefined,
   description: undefined,
-  hotelName: undefined,
-  hotelAddress: undefined,
-  hotelPhone: undefined,
-  hotelLink: undefined,
   tripId: undefined,
   tripPlace: [],
+  hotel: undefined,
 });
 const newPlace = ref({
   id: undefined,
@@ -48,6 +46,7 @@ onMounted(async () => {
   await getTripPlaces();
   await getPlaces();
   await getDays();
+  await getHotels();
 });
 
 async function getTrip() {
@@ -65,7 +64,7 @@ async function updateTrip() {
     .then(() => {
       snackbar.value.value = true;
       snackbar.value.color = "green";
-      snackbar.value.text = `${trip.value.name} updated successfully!`;
+      snackbar.value.text = `Trip updated successfully!`;
     })
     .catch((error) => {
       console.log(error);
@@ -76,10 +75,14 @@ async function updateTrip() {
   await getTrip();
 }
 
+function filterActive(temp){
+   return temp.is_active;
+}
+
 async function getPlaces() {
   await PlaceServices.getPlaces()
     .then((response) => {
-      places.value = response.data;
+      places.value = response.data.filter(filterActive);
     })
     .catch((error) => {
       console.log(error);
@@ -183,6 +186,7 @@ async function getDays() {
 }
 
 async function addStep() {
+  console.log(newDay.value);
   isAddStep.value = false;
   newDay.value.tripId = trip.value.id;
   delete newDay.value.id;
@@ -286,6 +290,19 @@ function openEditStep(step) {
   isEditStep.value = true;
 }
 
+const hotels = ref([]);
+
+async function getHotels() {
+  await HotelServices.getHotels()
+    .then((response) => {
+      hotels.value = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+
 function closeAddPlace() {
   isAddPlace.value = false;
 }
@@ -304,8 +321,7 @@ function closeEditStep() {
 
 
 function deleteTrip() {
-  if (confirm("Are you sure you want to delete trip?") === true)
-  {
+  if (confirm("Are you sure you want to delete trip?") === true) {
     TripServices.deleteTrip(trip.value.id)
       .then(() => {
         snackbar.value.value = true;
@@ -370,9 +386,7 @@ function closeSnackBar() {
               <v-list-item v-for="tripPlace in tripPlaces" :key="tripPlace.id">
                 <b>{{ tripPlace.duration }} hours
                 </b>
-                at {{ tripPlace.place.name }} {{
-                  tripPlace.place.link
-                }}
+                at {{ tripPlace.place.name }}
                 <template v-slot:append>
                   <v-row>
                     <v-icon class="mx-2" size="x-small" icon="mdi-pencil" @click="openEditPlace(tripPlace)"></v-icon>
@@ -400,13 +414,9 @@ function closeSnackBar() {
             <v-table>
               <tbody>
                 <tr v-for="day in days" :key="day.id">
-                  <td>{{ day.date }}</td>
+                  <td>{{ day.date.substring(0,10) }}</td>
                   <td>{{ day.weekday }}</td>
                   <td>{{ day.description }}</td>
-                  <td>{{ day.hotelName }}</td>
-                  <td>{{ day.hotelAddress }}</td>
-                  <td>{{ day.hotelPhone }}</td>
-                  <td>{{ day.hotelLink }}</td>
                   <td>
                     <v-chip size="small" v-for="place in day.tripPlace" :key="place.id" pill>{{ place.place.name
                     }}</v-chip>
@@ -490,20 +500,16 @@ function closeSnackBar() {
         <v-card-text>
           <v-text-field v-model="newDay.date" label="Date" type="Date" required></v-text-field>
 
-          <v-textarea v-model="newDay.weekday" label="Day" required></v-textarea>
+          <v-text-field v-model="newDay.weekday" label="Day" required></v-text-field>
 
           <v-textarea v-model="newDay.description" label="Description" required></v-textarea>
 
-          <v-textarea v-model="newDay.hotelName" label="HotelName" required></v-textarea>
-
-          <v-textarea v-model="newDay.hotelAddress" label="HotelAddress" required></v-textarea>
-
-          <v-textarea v-model="newDay.hotelPhone" label="HotelPhone" required></v-textarea>
-
-          <v-textarea v-model="newDay.hotelLink" label="HotelLink" required></v-textarea>
-
           <v-select v-model="newDay.tripPlace" :items="tripPlaces" item-title="place.name" item-value="id" label="Places"
             return-object multiple chips required></v-select>
+
+          <v-select v-model="newDay.hotel" :items="hotels" item-title="name" item-value="id" label="Hotels"
+            persistent-hint single-line required></v-select>
+
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
