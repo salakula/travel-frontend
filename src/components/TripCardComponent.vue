@@ -121,9 +121,9 @@ function navigateToEdit() {
               <td>{{ step.date.substring(0,10)  }}</td>
               <td>{{ step.weekday }}</td>
               <td>{{ step.description }}</td>
-              <td>{{ step.hotelName }}</td>
-              <td><a target="_blank" :href="step.hotelLink" >Open</a></td>
-              <td>{{ step.hotelPhone }}</td>
+              <td>{{ step.hotel.name }}</td>
+              <td><a target="_blank" :href="step.hotel.link" >Open</a></td>
+              <td>{{ step.hotel.phone }}</td>
               <td>
                 <v-chip class="mx-1 my-1" 
                   size="small"
