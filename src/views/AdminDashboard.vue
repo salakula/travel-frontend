@@ -374,6 +374,10 @@ async function updateStatusHotel(temp){
         });
 }
 
+async function showProfile() {
+    router.push({ name: "profile" });
+}
+
 function closeSnackBar() {
     snackbar.value.value = false;
 }
@@ -382,7 +386,8 @@ function closeSnackBar() {
     <v-app-bar color="teal" prominent>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-app-bar-title>{{ title }}</v-app-bar-title>
-
+        <v-spacer></v-spacer>
+        <v-avatar class="mr-5" @click="showProfile" v-if="user != null" color="white">{{ user.firstName[0].toUpperCase() + user.lastName[0].toUpperCase() }}</v-avatar>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" location="left" temporary>

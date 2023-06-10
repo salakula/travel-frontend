@@ -327,7 +327,7 @@ function deleteTrip() {
         snackbar.value.value = true;
         snackbar.value.color = "green";
         snackbar.value.text = `${trip.value.name} deleted successfully!`;
-        router.back();
+        router.go(-1);
       })
       .catch((error) => {
         console.log(error);
@@ -345,6 +345,7 @@ function closeSnackBar() {
 <template>
   <v-container>
     <v-app-bar color="teal" prominent>
+      <v-app-bar-nav-icon icon="mdi-arrow-left" @click="router.back()"></v-app-bar-nav-icon>
       <v-app-bar-title>Edit Trip</v-app-bar-title>
     </v-app-bar>
     <v-row>
@@ -455,10 +456,7 @@ function closeSnackBar() {
                 return-object required>
                 <template v-slot:prepend>
                   {{
-                    `${selectedPlace && selectedPlace.description
-                      ? selectedPlace.description
-                      : ""
-                    }${newPlace.duration > 1 ? " hours" : ""}`
+                    `${newPlace.duration > 1 ? " hours" : ""}`
                   }}
                   at
                 </template>

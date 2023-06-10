@@ -19,4 +19,7 @@ export default {
   deleteTrip(tripId) {
     return apiClient.delete("trips/" + tripId);
   },
+  addUser(tripId, userId) {
+    return apiClient.post("trips/" + tripId + "/user/" + userId);
+  }
 };
