@@ -24,5 +24,8 @@ export default {
   },
   makeAdmin(user) {
     return apiClient.put("users/" + user.id, user);
+  },
+  updateUser(user) {
+    return apiClient.put("users/" + user.id, user);
   }
 };
